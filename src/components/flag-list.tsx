@@ -46,7 +46,11 @@ export const FlagList = ({
   return (
     <Box flexDirection="column">
       <Box marginLeft={spacing.lg}>
-        <Text color={colors.muted} bold={focusedEnvironment !== undefined}>
+        <Text
+          color={colors.muted}
+          bold={focusedEnvironment !== undefined}
+          wrap="truncate-end"
+        >
           {"flag".padEnd(nameWidth + 2)}
           {"rollout".padEnd(statusWidth + 2)}
           {environments.map((env, ci) => (

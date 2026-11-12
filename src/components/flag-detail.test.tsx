@@ -16,7 +16,7 @@ const detail: FlagDetailView = {
       environment: "QA",
       production: false,
       state: "on",
-      defaultRule: "100%",
+      defaultRule: "on 100%",
       traffic: "100%",
       rules: 2,
       keys: 3,

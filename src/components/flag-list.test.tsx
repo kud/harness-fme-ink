@@ -23,15 +23,15 @@ const prodRows: FlagRowView[] = [
     flag: "checkout_new_flow",
     rolloutStatus: "50%",
     environments: [
-      cell("QA", "on", "100%", false),
-      cell("Prod", "on", "30% / off 70%", true),
+      cell("QA", "on", "on 100%", false),
+      cell("Prod", "on", "on 30% / off 70%", true),
     ],
   },
   {
     flag: "search_relevance",
     rolloutStatus: "10%",
     environments: [
-      cell("QA", "off", "100%", false),
+      cell("QA", "off", "off 100%", false),
       cell("Prod", "killed", "", true),
     ],
   },
@@ -39,7 +39,7 @@ const prodRows: FlagRowView[] = [
     flag: "dark_mode",
     rolloutStatus: "0%",
     environments: [
-      cell("QA", "partial", "30% / off 70%", false),
+      cell("QA", "partial", "on 30% / off 70%", false),
       cell("Prod", "undefined", "", true),
     ],
   },
@@ -77,8 +77,8 @@ test("no PROD marker when no environment is production", () => {
     {
       flag: "checkout_new_flow",
       environments: [
-        cell("QA", "on", "100%", false),
-        cell("Staging", "off", "100%", false),
+        cell("QA", "on", "on 100%", false),
+        cell("Staging", "off", "off 100%", false),
       ],
     },
   ]
@@ -106,7 +106,14 @@ const longRows: FlagRowView[] = [
   "flag_f",
 ].map((flag, i) => ({
   flag,
-  environments: [cell("QA", i % 2 === 0 ? "on" : "off", "100%", false)],
+  environments: [
+    cell(
+      "QA",
+      i % 2 === 0 ? "on" : "off",
+      i % 2 === 0 ? "on 100%" : "off 100%",
+      false,
+    ),
+  ],
 }))
 
 test("windowing keeps a deep selected row visible", () => {
@@ -155,4 +162,13 @@ test("shows the empty state when there are no flags", () => {
     <FlagList rows={[]} selectedIndex={0} height={10} />,
   )
   expect(lastFrame() ?? "").toContain("no flags")
+})
+
+test("shows the rule text once, without repeating the state word", () => {
+  const { lastFrame } = render(
+    <FlagList rows={prodRows} selectedIndex={0} height={10} />,
+  )
+  const frame = lastFrame() ?? ""
+  expect(frame).not.toContain("on on")
+  expect(frame).not.toContain("off off")
 })

@@ -18,14 +18,14 @@ export const stateColor = (state: EnvState): string => {
   }
 }
 
-// List cells: the rule reads `on 100%`, `off 100%`, `on 30% / off 70%`;
-// killed shows the word, undefined collapses to `-`.
+// List cells: `defaultRule` is the full rule text the host formats (`on 100%`,
+// `on 30% / off 70%`); killed shows the word, undefined collapses to `-`.
 export const envCellText = (
   cell: Pick<EnvCell, "state" | "defaultRule">,
 ): string => {
   if (cell.state === "killed") return "killed"
   if (cell.state === "undefined") return "-"
-  return cell.defaultRule ? `${cell.state} ${cell.defaultRule}` : cell.state
+  return cell.defaultRule || cell.state
 }
 
 export const resultColor = (status: ResultRowView["status"]): string => {
