@@ -1,0 +1,67 @@
+{
+  "name": "@kud/harness-fme-ink",
+  "version": "0.1.0",
+  "description": "Controlled Ink components for rendering Harness FME feature flags, environments and change plans",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "ink": ">=7",
+    "react": ">=19"
+  },
+  "dependencies": {
+    "@kud/ink-ui": "0.44.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.1",
+    "@types/react": "19.2.17",
+    "ink": "7.1.0",
+    "ink-testing-library": "4.0.0",
+    "react": "19.2.7",
+    "tsup": "8.5.1",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10"
+  },
+  "keywords": [
+    "harness",
+    "fme",
+    "split",
+    "feature-flags",
+    "ink",
+    "react",
+    "terminal",
+    "components"
+  ],
+  "homepage": "https://www.npmjs.com/package/@kud/harness-fme-ink",
+  "license": "MIT",
+  "author": "kud",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kud/harness-fme-ink.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
