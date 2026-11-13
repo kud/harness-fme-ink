@@ -1,0 +1,105 @@
+---
+title: 🎛️ Hosting
+description: How to drive the components from your own app shell, from selection and focus to the production confirm gate.
+---
+
+The components never read the keyboard. Your shell owns the selection index, the focused environment, any typed text and every key, and passes the result down as props. That is what lets a `FlagList` sit beside other panes on one screen.
+
+## Install
+
+```sh
+npm install @kud/harness-fme-ink ink react
+```
+
+`ink` (7 or later) and `react` (19 or later) are peer dependencies; Node 20 or later is required.
+
+## Selection and focus
+
+Keep the selected row and the focused environment in state, update them from your own `useInput`, and pass both to `FlagList` and `FlagDetail`:
+
+```tsx
+import { useState } from "react"
+import { Box, useInput } from "ink"
+import {
+  FlagList,
+  FlagDetail,
+  type FlagRowView,
+  type FlagDetailView,
+} from "@kud/harness-fme-ink"
+
+type Props = {
+  rows: FlagRowView[]
+  detailFor: (flag: string) => FlagDetailView
+}
+
+const Flags = ({ rows, detailFor }: Props) => {
+  const [selected, setSelected] = useState(0)
+  const [envIndex, setEnvIndex] = useState(0)
+
+  const environments = rows[0]?.environments ?? []
+  const focusedEnvironment = environments[envIndex]?.environment
+
+  useInput((_input, key) => {
+    if (key.upArrow) setSelected((s) => Math.max(0, s - 1))
+    if (key.downArrow) setSelected((s) => Math.min(rows.length - 1, s + 1))
+    if (key.leftArrow) setEnvIndex((i) => Math.max(0, i - 1))
+    if (key.rightArrow)
+      setEnvIndex((i) => Math.min(environments.length - 1, i + 1))
+  })
+
+  const current = rows[selected]
+
+  return (
+    <Box flexDirection="column">
+      <FlagList
+        rows={rows}
+        selectedIndex={selected}
+        height={15}
+        focusedEnvironment={focusedEnvironment}
+      />
+      {current ? (
+        <FlagDetail
+          detail={detailFor(current.flag)}
+          focusedEnvironment={focusedEnvironment}
+        />
+      ) : null}
+    </Box>
+  )
+}
+```
+
+The components do not clamp `selectedIndex` for you, so keep it within `rows` in your handlers.
+
+## Windowing long lists
+
+`FlagList` draws only `height` rows at a time. The slice comes from `windowRows`, which is exported so you can window your own lists the same way:
+
+```ts
+import { windowRows } from "@kud/harness-fme-ink"
+
+const { items, offset } = windowRows(allRows, selectedIndex, 10)
+// items: the visible slice; offset: the index of items[0] in allRows
+```
+
+Its behaviour:
+
+- If the list fits in `rows`, it returns everything with `offset` 0.
+- Otherwise it keeps the selected item roughly centred, clamped so the window never runs past either end.
+- A `rows` value below 1 is treated as 1.
+
+## The production gate
+
+A write usually runs in three steps: show a `PlanTable`, confirm with `ConfirmPanel`, then report progress with `ResultList`. The confirm step is the one that needs care.
+
+```tsx
+<ConfirmPanel
+  environment="live"
+  production
+  summary="3 flags will change"
+  typed={typed}
+/>
+```
+
+For production, collect the typed characters yourself and pass them in as `typed`. The panel shows `✓ matches` and offers `enter apply` only when `typed === environment`, case-sensitive. It does not stop anything on its own: your `enter` handler must make the same comparison before it applies the plan. For a non-production environment the panel offers `y apply · esc cancel`, and what `y` does is again up to you.
+
+While the write runs, update each row's `status` from `pending` through `running` to `applied`, `skipped` or `failed`, and re-render `ResultList` with the new rows.

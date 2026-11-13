@@ -1,0 +1,118 @@
+---
+title: 📐 View models
+description: The small types your host maps its own flag data onto, and how each field is shown.
+---
+
+The package knows nothing about any client. You build these view models from whatever your data source returns and pass them to the components. All of them are exported as types:
+
+```ts
+import type {
+  EnvState,
+  EnvCell,
+  FlagRowView,
+  EnvDetailView,
+  FlagDetailView,
+  PlanRowView,
+  ResultRowView,
+} from "@kud/harness-fme-ink"
+```
+
+## EnvState
+
+The state of a flag in one environment:
+
+```ts
+type EnvState = "on" | "off" | "partial" | "killed" | "undefined"
+```
+
+`killed` and `undefined` have fixed renderings in the list (`killed` and `-`); the other three show your rule text.
+
+## EnvCell
+
+One cell of the `FlagList` matrix.
+
+```ts
+type EnvCell = {
+  environment: string
+  state: EnvState
+  defaultRule: string
+  production: boolean
+}
+```
+
+`defaultRule` is the full rule text as you want it shown, such as `on 100%` or `on 30% / off 70%`. The component does not format it. Production is set per environment, not per flag, so the same flag can be `production: false` in `staging` and `production: true` in `live`.
+
+## FlagRowView
+
+One row of `FlagList`.
+
+```ts
+type FlagRowView = {
+  flag: string
+  rolloutStatus?: string
+  environments: EnvCell[]
+}
+```
+
+`rolloutStatus` is free text shown in the `rollout` column. Keep `environments` in the same order on every row: the list takes its columns from the first row.
+
+## EnvDetailView
+
+One environment row in `FlagDetail`.
+
+```ts
+type EnvDetailView = {
+  environment: string
+  production: boolean
+  state: EnvState
+  defaultRule: string
+  traffic: string
+  rules: number
+  keys: number
+  segments: string[]
+}
+```
+
+`traffic` is free text, `rules` and `keys` are counts, and `segments` is joined with commas. An empty `defaultRule` or `segments` shows as `-`.
+
+## FlagDetailView
+
+The input to `FlagDetail`.
+
+```ts
+type FlagDetailView = {
+  flag: string
+  rolloutStatus?: string
+  tags: string[]
+  description?: string
+  environments: EnvDetailView[]
+}
+```
+
+## PlanRowView
+
+One row of `PlanTable`.
+
+```ts
+type PlanRowView = {
+  flag: string
+  action: "update" | "skip" | "error"
+  detail: string
+}
+```
+
+`PlanTable` counts the `update`, `skip` and `error` rows for its summary line.
+
+## ResultRowView
+
+One row of `ResultList`.
+
+```ts
+type ResultRowView = {
+  flag: string
+  status: "pending" | "running" | "applied" | "skipped" | "failed"
+  reason?: string
+}
+```
+
+`reason` is shown after the status, typically for `skipped` or `failed` rows.

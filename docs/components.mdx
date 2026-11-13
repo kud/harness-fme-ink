@@ -1,0 +1,101 @@
+---
+title: 🧩 Components
+description: Every exported component, its props, and what it renders for each state.
+---
+
+All six components are controlled: they render what their props say and never call `useInput`. Colours come from the `@kud/ink-ui` token set, and no state relies on colour alone: there is always a word or marker too (`PROD`, `killed`, `✓ matches`).
+
+```tsx
+import {
+  FlagList,
+  FlagDetail,
+  PlanTable,
+  ConfirmPanel,
+  ResultList,
+  EnvBadge,
+} from "@kud/harness-fme-ink"
+```
+
+Each component also exports its props type: `FlagListProps`, `FlagDetailProps`, `PlanTableProps`, `ConfirmPanelProps`, `ResultListProps` and `EnvBadgeProps`.
+
+## FlagList
+
+A windowed, selectable matrix of flags by environment.
+
+| Prop                 | Type            | Required | Notes                                                        |
+| -------------------- | --------------- | -------- | ------------------------------------------------------------ |
+| `rows`               | `FlagRowView[]` | yes      | One row per flag                                             |
+| `selectedIndex`      | `number`        | yes      | Index into `rows` of the highlighted row                     |
+| `height`             | `number`        | yes      | How many flag rows are visible; the window follows the selection |
+| `focusedEnvironment` | `string`        | no       | Environment whose column is emphasised                       |
+| `emptyText`          | `string`        | no       | Shown when `rows` is empty; defaults to `no flags`           |
+
+The header reads `flag`, `rollout`, then one column per environment, taken from the **first** row's `environments`. Every row's cells are read by position against those columns, so give each row its environments in the same order. Production environments get a ` PROD` suffix in the header, and the focused one is bold with a `▸` marker.
+
+Each cell shows:
+
+- `killed` when the state is `killed`
+- `-` when the state is `undefined`
+- otherwise the cell's `defaultRule`, or the state word if `defaultRule` is empty
+
+Rows are keyed by `flag`, so flag names should be unique within a list. Only `height` rows are drawn at once; see [`windowRows`](/projects/harness-fme-ink/docs/hosting#windowing-long-lists) for how the slice is chosen.
+
+## FlagDetail
+
+One flag in depth: name, rollout status, tags, description and a row per environment.
+
+| Prop                 | Type             | Required | Notes                                     |
+| -------------------- | ---------------- | -------- | ----------------------------------------- |
+| `detail`             | `FlagDetailView` | yes      | The flag to show                          |
+| `focusedEnvironment` | `string`         | no       | Environment whose row is highlighted      |
+
+The heading is the flag name followed by its `rolloutStatus` when set. A `tags:` line appears only when there are tags, and the description only when present. The table columns are `environment`, `state`, `rule`, `traffic`, `rules`, `keys` and `segments`; an empty `defaultRule` or an empty `segments` list shows as `-`. With no environments at all it shows the flag name and `no environments`.
+
+## PlanTable
+
+A change plan for one environment, before anything is applied.
+
+| Prop          | Type            | Required | Notes                                       |
+| ------------- | --------------- | -------- | ------------------------------------------- |
+| `rows`        | `PlanRowView[]` | yes      | One row per flag                            |
+| `environment` | `string`        | yes      | Target environment, shown in the heading    |
+| `production`  | `boolean`       | yes      | Adds the `PROD` marker to the heading       |
+
+It renders a `plan` heading with the environment badge, a summary such as `3 changes, 1 skipped` (with `, N errors` appended only when there are errors), then a `flag` / `action` / `detail` table. An empty plan renders `no changes`.
+
+## ConfirmPanel
+
+The apply gate. It only renders; your host decides what `y`, `esc` and `enter` do.
+
+| Prop          | Type      | Required | Notes                                                       |
+| ------------- | --------- | -------- | ----------------------------------------------------------- |
+| `environment` | `string`  | yes      | Environment the write targets                               |
+| `production`  | `boolean` | yes      | Switches to the typed-name confirmation                     |
+| `summary`     | `string`  | yes      | One line describing the change, such as `3 flags will change` |
+| `typed`       | `string`  | no       | What the user has typed so far; defaults to an empty string |
+
+For a non-production environment it shows `apply to` with the environment, your summary and the hint `y apply · esc cancel`.
+
+For production it switches to a warning panel titled `PROD · <environment>`, asks for the environment name to be typed, echoes what has been typed (or `(nothing typed)`), and shows `✓ matches` or `✗ does not match`. The `enter apply` hint only appears once `typed` equals `environment` exactly, case included. The panel shows the gate; it does not hold it, so your host must apply the same check. See [Hosting](/projects/harness-fme-ink/docs/hosting#the-production-gate).
+
+## ResultList
+
+Live progress of a write.
+
+| Prop        | Type              | Required | Notes                                                |
+| ----------- | ----------------- | -------- | ---------------------------------------------------- |
+| `rows`      | `ResultRowView[]` | yes      | One row per flag                                     |
+| `emptyText` | `string`          | no       | Shown when `rows` is empty; defaults to `no results` |
+
+Each row shows the flag, its status word and the optional `reason`. Rows with status `running` also get a spinner, but the word is always there.
+
+## EnvBadge
+
+The small shared label used by the other components.
+
+| Prop          | Type      | Required |
+| ------------- | --------- | -------- |
+| `environment` | `string`  | yes      |
+| `production`  | `boolean` | yes      |
+
+It renders the environment name, followed by a bold `PROD` when `production` is true.

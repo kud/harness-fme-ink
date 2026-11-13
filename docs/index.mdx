@@ -1,0 +1,14 @@
+---
+title: 👋 Introduction
+description: Controlled Ink components for rendering Harness FME feature flags, their environments and change plans in the terminal.
+---
+
+**harness-fme-ink** is a set of presentation-only [Ink](https://github.com/vadimdemedes/ink) components for feature flags: props in, nothing fetched, no keys handled. Your app holds the data, the selection and every keystroke, so the same flag list works as a full-screen CLI or as one pane in a larger dashboard.
+
+It has no dependency on any Harness FME client. It defines a handful of small view models, and your host maps its own data onto them.
+
+## What's here
+
+- [🧩 Components](/projects/harness-fme-ink/docs/components) — the six exported components, their props and exactly what each one renders
+- [📐 View models](/projects/harness-fme-ink/docs/view-models) — the types your host builds, and how each field is displayed
+- [🎛️ Hosting](/projects/harness-fme-ink/docs/hosting) — wiring selection, focus, windowing and the production confirm gate in your own shell
